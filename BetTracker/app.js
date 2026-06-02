@@ -7,80 +7,12 @@ function uid() {
   return `bet-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-const sampleBets = [
-  {
-    id: uid(),
-    date: "2026-05-24",
-    sport: "Basketball",
-    league: "NBA",
-    market: "Player Prop",
-    event: "Pacers at Knicks",
-    pick: "Jalen Brunson over 29.5 points",
-    odds: -115,
-    stake: 50,
-    status: "Won",
-    book: "FanDuel",
-    player: "Jalen Brunson",
-    propLine: "29.5 points",
-    parlay: false,
-    legs: 1,
-    notes: "Usage edge with short rotation."
-  },
-  {
-    id: uid(),
-    date: "2026-05-26",
-    sport: "Hockey",
-    league: "NHL",
-    market: "Moneyline",
-    event: "Stars at Oilers",
-    pick: "Oilers ML",
-    odds: -125,
-    stake: 80,
-    status: "Lost",
-    book: "DraftKings",
-    player: "",
-    propLine: "",
-    parlay: false,
-    legs: 1,
-    notes: ""
-  },
-  {
-    id: uid(),
-    date: "2026-05-28",
-    sport: "Soccer",
-    league: "UCL",
-    market: "Parlay",
-    event: "Final props",
-    pick: "BTTS + over 2.5",
-    odds: 185,
-    stake: 35,
-    status: "Won",
-    book: "Bet365",
-    player: "",
-    propLine: "",
-    parlay: true,
-    legs: 2,
-    notes: "Correlation accepted."
-  },
-  {
-    id: uid(),
-    date: "2026-06-03",
-    sport: "Football",
-    league: "NFL",
-    market: "Future",
-    event: "Season wins",
-    pick: "Lions over 10.5 wins",
-    odds: 110,
-    stake: 60,
-    status: "Pending",
-    book: "Caesars",
-    player: "",
-    propLine: "",
-    parlay: false,
-    legs: 1,
-    notes: "Schedule and roster continuity."
-  }
-];
+const DEMO_PICKS = new Set([
+  "Jalen Brunson over 29.5 points",
+  "Oilers ML",
+  "BTTS + over 2.5",
+  "Lions over 10.5 wins"
+]);
 
 let bets = loadBets();
 let settings = loadSettings();
@@ -93,9 +25,16 @@ const pct = (n) => `${Number.isFinite(n) ? n.toFixed(1) : "0.0"}%`;
 
 function loadBets() {
   const stored = localStorage.getItem(STORE_KEY);
-  if (stored) return JSON.parse(stored);
-  localStorage.setItem(STORE_KEY, JSON.stringify(sampleBets));
-  return sampleBets;
+  if (!stored) return [];
+
+  const parsed = JSON.parse(stored);
+  const containsOnlyDemoBets = parsed.length > 0 && parsed.every((bet) => DEMO_PICKS.has(bet.pick));
+  if (containsOnlyDemoBets) {
+    localStorage.setItem(STORE_KEY, JSON.stringify([]));
+    return [];
+  }
+
+  return parsed;
 }
 
 function loadSettings() {
